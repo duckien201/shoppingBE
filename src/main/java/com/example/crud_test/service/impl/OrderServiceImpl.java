@@ -138,6 +138,7 @@ public class OrderServiceImpl implements OrderService {
                     orderItemRepository.save(orderItem);
 
                     product.setRemain(product.getRemain() - orderItemDto.getQuantity());
+                    product.setNumberOfSale(product.getNumberOfSale() + orderItemDto.getQuantity());
                     productRepository.save(product);
                 }
             }

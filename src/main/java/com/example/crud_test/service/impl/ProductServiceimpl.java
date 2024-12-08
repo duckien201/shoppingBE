@@ -1,8 +1,10 @@
 package com.example.crud_test.service.impl;
 
 import com.example.crud_test.constant.CreateNotification;
+import com.example.crud_test.model.RateProduct;
 import com.example.crud_test.repository.CategoryRepo;
 import com.example.crud_test.repository.ProductRepository;
+import com.example.crud_test.repository.RateRepository;
 import com.example.crud_test.repository.UserRepository;
 import com.example.crud_test.dto.ProductDto;
 import com.example.crud_test.model.Product;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.example.crud_test.constant.Constant.NOTI_ADMIN_NEW_PRODUCT;
@@ -29,6 +32,9 @@ public class ProductServiceimpl implements ProductService {
 
     @Autowired
     private CreateNotification createNotification;
+
+    @Autowired
+    private RateRepository rateRepository;
 
     @Override
     public List<Product> getBestSeller() {
@@ -93,6 +99,22 @@ public class ProductServiceimpl implements ProductService {
 
     @Override
     public List<Product> getAllProduct() {
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+        List<RateProduct> ratings = rateRepository.findAll();
+
+        Map<Long, Double> productStars = ratings.stream()
+                .collect(Collectors.groupingBy(rating -> rating.getProduct().getIdProduct(),
+                        Collectors.averagingDouble(RateProduct::getStar)));
+
+        // Add stars to products
+        products.forEach(product -> {
+            Double averageStars = productStars.get(product.getIdProduct());
+            if (averageStars != null) {
+                int roundedStars = (int) Math.round(averageStars);
+                product.setStar(roundedStars);
+            }
+        });
+
+        return products;
     }
 }

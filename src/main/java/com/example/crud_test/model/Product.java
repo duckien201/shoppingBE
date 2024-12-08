@@ -39,6 +39,8 @@ public class Product {
     private int remain;
     private int numberOfSale;
 
+    private int star;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
